@@ -5,6 +5,7 @@ import { signIn } from "aws-amplify/auth";
 import { signOut } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../amplify/data/resource";
+import { useEffect, useState } from "react";
 
 Amplify.configure(config);
 // Amplify.configure({
@@ -45,15 +46,26 @@ await signOut();
 // });
 
 // WSS Connect & Subscribe
-let channel = await events.connect("test/events");
-channel.subscribe({
-  next: (data) => {
-    console.log("received", data.event);
-    console.log("type", typeof data.event);
-  },
-  error: (err) => console.error("test", err),
-});
+
+const channel = await events.connect("test/events");
+
 function App() {
+  const [sockedOn, setSocketOn] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!sockedOn) return;
+    const sub = channel.subscribe({
+      next: (data) => {
+        console.log("received", data.event);
+        console.log("type", typeof data.event);
+      },
+      error: (err) => console.error("test", err),
+    });
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [sockedOn])
+
   // publish event to channel via WS
   const publishSingleEvent = async () => {
     try {
@@ -109,6 +121,10 @@ function App() {
     }
   };
 
+  const toggleSocket = () => {
+    setSocketOn(!sockedOn);
+  }
+
   return (
     <main>
       <button onClick={publishSingleEvent}>Publish Single Event (WS)</button>
@@ -121,6 +137,9 @@ function App() {
       <button onClick={publishRestSingle}>Publish Single Event (REST)</button>
       <button onClick={publishRestMultiple}>
         Publish Multiple Events (REST)
+      </button>
+      <button onClick={toggleSocket}>
+        {sockedOn ? "Disable" : "Enable"} Socket
       </button>
     </main>
   );

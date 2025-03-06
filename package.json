@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.5.5",
-    "aws-amplify": "file:../../amplify-js/packages/aws-amplify",
+    "aws-amplify": "file:/Users/stocaaro/workplace/2025/09/amplify-js/packages/aws-amplify",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
