@@ -48,12 +48,18 @@ await signOut();
 // WSS Connect & Subscribe
 
 const channel = await events.connect("test/events");
+const channel2 = await events.connect("test/events2");
+const channel3 = await events.connect("test/events3");
+const channel4 = await events.connect("test/events4");
 
 function App() {
-  const [sockedOn, setSocketOn] = useState<boolean>(false);
+  const [subOn, setSubOn] = useState<boolean>(false);
+
+  const [otherThing, setOtherThing] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!sockedOn) return;
+    console.log('asd', otherThing);
+    if (!subOn) return;
     const sub = channel.subscribe({
       next: (data) => {
         console.log("received", data.event);
@@ -64,7 +70,7 @@ function App() {
     return () => {
       sub.unsubscribe();
     };
-  }, [sockedOn])
+  }, [subOn, otherThing])
 
   // publish event to channel via WS
   const publishSingleEvent = async () => {
@@ -83,6 +89,10 @@ function App() {
   const publishSingleEventNoAuth = async () => {
     try {
       await channel.publish({ key: "my event content" });
+      await channel2.publish({ key: "my event content" });
+      await channel3.publish({ key: "my event content" });
+      await channel4.publish({ key: "my event content" });
+
       console.log("Single event published via WS");
     } catch (error) {
       console.error("Error publishing single event:", error);
@@ -122,7 +132,20 @@ function App() {
   };
 
   const toggleSocket = () => {
-    setSocketOn(!sockedOn);
+    setSubOn(!subOn);
+  }
+  const toggleOtherThing = () => {
+    setOtherThing(!otherThing);
+  }
+
+  const closeChannels = () => {
+    channel.close();
+    channel2.close();
+    channel3.close();
+  }
+
+  const closeLastChannel = () => {
+    channel4.close();
   }
 
   return (
@@ -139,7 +162,16 @@ function App() {
         Publish Multiple Events (REST)
       </button>
       <button onClick={toggleSocket}>
-        {sockedOn ? "Disable" : "Enable"} Socket
+        {subOn ? "Disable" : "Enable"} Socket
+      </button>
+      <button onClick={toggleOtherThing}>
+       Other
+      </button>
+      <button onClick={closeChannels}>
+       Close channels!
+      </button>
+      <button onClick={closeLastChannel}>
+       Close the last channel
       </button>
     </main>
   );
